@@ -35,20 +35,32 @@ function ghz_to_mm(freq) = (299.792458 / freq);
 /* Length of waveguide, including flange, feeding horn */
 feed_len = 1 * ghz_to_mm(18);
 
+/* Set to 1 to split horn along short side of section. This can make coating inside of waveguide much easier. */
+split_part = 0;
 
+
+
+/******************************************************************************/
 
 /* Import waveguide components */
 include <common.scad>
 
+difference() {
+    union() {
+        translate([0, 0, (flanged / 2) + trim])
+            flange();
 
+        translate([0, 0, flanged - 0.0001])
+            waveguide((feed_len - flanged) + 0.0002);
 
-translate([0, 0, (flanged / 2) + trim])
-    flange();
+        translate([0, 0, feed_len])
+            //horn(30, 30, 30);
+            ideal_horn(60, 60, ghz_to_mm(18));
+    }
 
-translate([0, 0, flanged - 0.0001])
-    waveguide((feed_len - flanged) + 0.0002);
+    if(split_part) {
+        translate([-trim, -50, -flanged])
+            cube([trim * 2, 100, (feed_len+length)*3]);
+    }
+}
 
-translate([0, 0, feed_len])
-    //horn(30, 30, 30);
-    ideal_horn(60, 60, ghz_to_mm(18));
- 
