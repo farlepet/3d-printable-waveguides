@@ -64,6 +64,30 @@ module waveguide(wg_len) {
     }
 }
 
+module _curve(x_sz, y_sz, _rad, _angle, _rot=0) {
+    translate([-_rad, , 0]) {
+        rotate([90, _rot, 0]) {
+            rotate_extrude(angle = _angle) {
+                translate([_rad, 0, 0]) {
+                    square([x_sz, y_sz], center = true);
+                }
+            }
+        }
+    }
+
+}
+
+/* Create a waveguide bend
+ *   rg_rad: Radius of bend, at center of the waveguide cross-section
+ *   wg_angle: Angle of bend
+ */
+module waveguide_bend(wg_rad, wg_angle) {
+    difference() {
+        _curve(wgsize_b+wall*2, wgsize_a+wall*2, wg_rad, wg_angle, $fn=300);
+        _curve(wgsize_b,        wgsize_a,        wg_rad, wg_angle+0.02, 0.01, $fn=300);
+    }
+}
+
 /* Generate horn antenna
  *   length:  Length of horn
  *   theta_h: Angle of horn in magnetic field
