@@ -30,10 +30,15 @@ trim = 0.05;
 /* Length of horn, in wavelengths */
 horn_len = 2;
 
+/* Design frequency, in GHz */
+design_freq = 18;
+
 function ghz_to_mm(freq) = (299.792458 / freq);
 
+design_wavelen = ghz_to_mm(design_freq);
+
 /* Length of waveguide, including flange, feeding horn */
-feed_len = 1 * ghz_to_mm(18);
+feed_len = 1 * design_wavelen;
 
 /* Set to 1 to split horn along short side of section. This can make coating inside of waveguide much easier. */
 split_part = 0;
@@ -55,7 +60,7 @@ difference() {
 
         translate([0, 0, feed_len])
             //horn(30, 30, 30);
-            ideal_horn(60, 60, ghz_to_mm(18));
+            ideal_horn(60, 60, design_wavelen);
     }
 
     if(split_part) {
