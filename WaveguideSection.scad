@@ -7,7 +7,7 @@
  ********************/
 
 /* Waveguide selection */
-wrcode = 4;
+wrcode = 1;
 
 /* Waveguide wall thickness */
 wall = 2;
@@ -22,7 +22,7 @@ length = 66.66;
 trim = 0.05;
 
 /* Set to 1 to split waveguide along short side of section. This can make coating inside of waveguide much easier. */
-split_part = 0;
+split_part = 1;
 
 
 
@@ -41,8 +41,8 @@ difference() {
     }
 
     if(split_part) {
-        translate([-trim, -50, -flanged])
-            cube([trim * 2, 100, length*1.5]);
+        translate([-trim, -wgsize_a, -flanged])
+            cube([trim * 2, wgsize_a*2, length*1.5]);
     }
 }
 

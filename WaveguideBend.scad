@@ -7,7 +7,7 @@
  ********************/
 
 /* Waveguide selection */
-wrcode = 6;
+wrcode = 1;
 
 /* Waveguide wall thickness */
 wall = 2;
@@ -22,12 +22,12 @@ trim = 0.05;
 section_angle = 90;
 
 /* Radius of the bend, taken at the center of the waveguide */
-section_radius = 20;
+section_radius = 40;
 
 /* Length of straight waveguide on either side of the curve, including flanges.
  * NOTE: This may not currently be accurate on the far side of the curve, the
  * flange thickness may not be appropriately accounted for. */
-straight_length = 20;
+straight_length = 80;
 
 /* Set to 1 to split waveguide along short side of section. This can make coating inside of waveguide much easier. */
 split_part = 1;
@@ -62,11 +62,11 @@ difference() {
     }
 
     if(split_part) {
-        translate([flange_size/1.9, 0, -flanged]) {
+        translate([wgsize_a, 0, -flanged]) {
             rotate([0, 0, 180]) {
-                cube([(section_radius + straight_length)*1.5,
+                cube([(section_radius + straight_length)*2,
                       trim*2,
-                      (section_radius + straight_length)*1.5]);
+                      (section_radius + straight_length)*2]);
             }
         }
     }
