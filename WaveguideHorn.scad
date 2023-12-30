@@ -4,7 +4,7 @@
 
 
 /* Waveguide selection */
-wrcode = 1;
+wrcode = 6;
 
 /* Waveguide wall thickness */
 wall = 2;
@@ -22,7 +22,7 @@ trim = 0.05;
 horn_len = 2;
 
 /* Design frequency, in GHz */
-design_freq = 3;
+design_freq = 6;
 
 function ghz_to_mm(freq) = (299.792458 / freq);
 
@@ -55,8 +55,9 @@ difference() {
     }
 
     if(split_part) {
-        translate([-trim, -wgsize_a, -flanged])
-            cube([trim * 2, wgsize_a*2, (feed_len+length)*3]);
+        /* This may beed to be modified for large horns - no visibility into actual length, especially for ideal horns */
+        translate([-trim, -wgsize_a*4, -flanged])
+            cube([trim * 2, wgsize_a*8, (feed_len+length)*3]);
     }
 }
 

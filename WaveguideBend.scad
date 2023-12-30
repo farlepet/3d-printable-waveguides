@@ -7,7 +7,7 @@
  ********************/
 
 /* Waveguide selection */
-wrcode = 1;
+wrcode = 6;
 
 /* Waveguide wall thickness */
 wall = 2;

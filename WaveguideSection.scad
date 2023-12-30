@@ -16,7 +16,7 @@ wall = 2;
 flanged = 3;
 
 /* Length of waveguide section, including flanges */
-length = 66.66;
+length = 75;
 
 /* Amount to trim back internal and mating surfaces, for the purpose of accounting for metallic tape or coating. */
 trim = 0.05;
@@ -41,8 +41,8 @@ difference() {
     }
 
     if(split_part) {
-        translate([-trim, -wgsize_a, -flanged])
-            cube([trim * 2, wgsize_a*2, length*1.5]);
+        translate([-trim, -wgsize_a*2, -flanged])
+            cube([trim * 2, wgsize_a*4, length*1.5]);
     }
 }
 
