@@ -34,9 +34,9 @@ wrtab            = [0, 430,    340,   284,    229,   187,   159,   137,   112,  
  * TODO: Allow selecting flange type manually */
 fttab            = [0,   2,      2,     3,      2,     3,     2,     2,     1,     1,     1,     1,     1,     1,     1,    1   ];     /* Flange type */
 /* Square flange */
-fstab            = [0,   0,      0,     0,      0,     0,     0,     0,    47.9,  41.4,  38.3,  33.3,  31.0,  22.41, 22.1, 19.05]*1.0; /* Flange size */
-fhstab           = [0,   0,      0,     0,      0,     0,     0,     0,    18.72, 16.26, 14.25, 12.14, 11.25,  8.51,  7.9,  6.73]*1.0; /* Hole spacing short side */
-fhltab           = [0,   0,      0,     0,      0,     0,     0,     0,    17.17, 15.49, 13.21, 12.63, 10.29,  8.13,  7.5,  6.34]*1.0; /* Hole spacing long side */
+sflange_sz       = [0,   0,      0,     0,      0,     0,     0,     0,    47.9,  41.4,  38.3,  33.3,  31.0,  22.41, 22.1, 19.05]*1.0; /* Flange size */
+sflange_b_sp     = [0,   0,      0,     0,      0,     0,     0,     0,    18.72, 16.26, 14.25, 12.14, 11.25,  8.51,  7.9,  6.73]*1.0; /* Hole spacing short side */
+sflange_a_sp     = [0,   0,      0,     0,      0,     0,     0,     0,    17.17, 15.49, 13.21, 12.63, 10.29,  8.13,  7.5,  6.34]*1.0; /* Hole spacing long side */
 /* Rectangular flange */
 rflange_a_sz     = [0, 161.04, 138.18,  0,     98.30,  0,    81.03, 68.33,  0,     0,     0,     0,     0,     0,     0,    0   ]*1.0; /* Flange size in A direction */
 rflange_b_sz     = [0, 106.43,  95.25,  0,     69.85,  0,    61.98, 49.28,  0,     0,     0,     0,     0,     0,     0,    0   ]*1.0; /* Flange size in B direction */
@@ -51,16 +51,12 @@ cflange_hole_r   = [0,   0,      0,    60.33,   0,    41.28,  0,     0,     0,  
 cflange_hole_off = [0,   0,      0,    22.5,    0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0   ]*1.0; /* Circular flange screw placement angle offset */
 
 
-drilltab         = [0,   6.76,   6.76,  6.53,   6.50,  5.1,   6.5,   5.0,   4.3,   4.3,   4.1,   4.1,   4.1,   3.1,   3.1,  3.0 ]*1.0; /* Hole size */
+drilltab         = [0,   6.76,   6.76,  6.53,   6.50,  5.1,   6.5,   5.0,   4.3,   4.3,   4.1,   4.1,   4.1,   3.1,   3.1,  3.0 ]*1.0; /* Hole diameter */
 /* Not all waveguide opening sizes correspong 100% to the waveguide number */
 wgatab           = [0, 109.22,  86.36, 72.136, 58.17, 47.55, 40.39, 34.85, 28.50, 22.86, 19.05, 15.80, 12.95, 10.67,  8.64, 7.11]*1.0; /* Waveguide opening size A */
 wgbtab           = [0,  54.61,  43.18, 34.036, 29.08, 22.15, 20.19, 15.80, 12.62, 10.16,  9.53,  7.90,  6.48,  4.32,  4.32, 3.56]*1.0; /* Waveguide opening size B */
 
 
-flange_size   = fstab[wrcode];        /* Square size of flange */
-flange_hole_s = fhstab[wrcode];       /* Hole spacing on short B side */
-flange_hole_l = fhltab[wrcode];       /* Hole spacing on long A side */
-flange_drill  = drilltab[wrcode]/2.0; /* Flange mounting hole size */
 
 wgsize_a = wgatab[wrcode] + (trim * 2);
 wgsize_b = wgbtab[wrcode] + (trim * 2);
@@ -72,13 +68,18 @@ $fn=36;
  *   Heavily based on code from Rolf-Dieter Klein (www.rdklein.de)
  *   https://www.thingiverse.com/thing:161428
  */
-module flange() {
+module flange(wrid = wrcode) {
     thickness = flanged - trim;
 
-    flange_type = fttab[wrcode];
+    flange_type   = fttab[wrid];
+    flange_drill  = drilltab[wrid]/2.0;
 
     if(flange_type == 1) {
         /* Square flange */
+
+        flange_size   = sflange_sz[wrid];
+        flange_hole_s = sflange_b_sp[wrid];
+        flange_hole_l = sflange_a_sp[wrid];
 
         difference() {
             difference() {
@@ -87,7 +88,7 @@ module flange() {
                     rotate([0,0,45])
                         cube([flange_size*1.4142*0.9,flange_size*1.4142*0.9,thickness],center=true);
                 }
-                cube([wgsize_b,wgsize_a,flanged*2],center=true);
+                cube([wgbtab[wrid], wgatab[wrid], flanged*2], center=true);
             }
             /* Holes */
             translate([-flange_hole_s,  flange_hole_l, 0]) cylinder(h=thickness*1.1, r=flange_drill, center=true);
@@ -105,11 +106,11 @@ module flange() {
                 translate([0, 0, -(thickness/2)]) {
                     linear_extrude(height = thickness) {
                         offset(r = flange_radius, $fn=60) {
-                            square([rflange_b_sz[wrcode] - (flange_radius * 2), rflange_a_sz[wrcode] - (flange_radius * 2)], center=true);
+                            square([rflange_b_sz[wrid] - (flange_radius * 2), rflange_a_sz[wrid] - (flange_radius * 2)], center=true);
                         }
                     }
                 }
-                cube([wgsize_b,wgsize_a,flanged*2],center=true);
+                cube([wgbtab[wrid], wgatab[wrid], flanged*2],center=true);
             }
 
             for(m = [0:1]) {
@@ -117,15 +118,15 @@ module flange() {
                     for(n = [0:1]) {
                         mirror([0,n,0]) {
                             /* B side */
-                            translate([rflange_b_b_off[wrcode], rflange_b_a_off[wrcode], 0]) {
+                            translate([rflange_b_b_off[wrid], rflange_b_a_off[wrid], 0]) {
                                 cylinder(h=flanged*1.1, r=flange_drill, center=true);
                             }
                             /* A side */
-                            translate([rflange_a_b_off[wrcode], rflange_a_a_off[wrcode], 0]) {
+                            translate([rflange_a_b_off[wrid], rflange_a_a_off[wrid], 0]) {
                                 cylinder(h=flanged*1.1, r=flange_drill, center=true);
                             }
-                            if(rflange_hole_cnt[wrcode] >= 10) {
-                                translate([rflange_a_b_off[wrcode], 0, 0]) {
+                            if(rflange_hole_cnt[wrid] >= 10) {
+                                translate([rflange_a_b_off[wrid], 0, 0]) {
                                     cylinder(h=flanged*1.1, r=flange_drill, center=true);
                                 }
                             }
@@ -138,12 +139,12 @@ module flange() {
         /* Circular flange */
 
         difference() {
-            cylinder(h=thickness, r=cflange_r[wrcode], center=true, $fn=120);
-            cube([wgsize_b,wgsize_a,flanged*2],center=true);
+            cylinder(h=thickness, r=cflange_r[wrid], center=true, $fn=120);
+            cube([wgbtab[wrid], wgatab[wrid], flanged*2],center=true);
 
             for(i = [0:7]) {
-                rotate(cflange_hole_off[wrcode] + i * 45, [0, 0, 1]) {
-                    translate([cflange_hole_r[wrcode], 0, 0]) {
+                rotate(cflange_hole_off[wrid] + i * 45, [0, 0, 1]) {
+                    translate([cflange_hole_r[wrid], 0, 0]) {
                         cylinder(h=flanged*1.1, r=flange_drill, center=true);
                     }
                 }
@@ -155,12 +156,75 @@ module flange() {
 /* Create a flangeless section of waveguide
  *   wg_len: Length of section, in mm
  */
-module waveguide(wg_len) {
+module waveguide(wg_len, wrid=wrcode) {
+    wgsize_a = wgatab[wrid] + (trim * 2);
+    wgsize_b = wgbtab[wrid] + (trim * 2);
+
     translate([0,0,wg_len/2]) {
         difference() {
             cube([wgsize_b+wall*2, wgsize_a+wall*2, wg_len],          center=true);
             cube([wgsize_b,        wgsize_a,        wg_len + wall*.1],center=true);
         }
+    }
+}
+
+/* Create a flangeless section of waveguide transition
+ *   wg_len: Length of section, in mm
+ *   wrid_1: Start waveguide ID
+ *   wrid_2: End waveguide ID
+ */
+module waveguide_transition(wg_len, wrid_1, wrid_2) {
+    wgsz_1_a = wgatab[wrid_1] + (trim * 2);
+    wgsz_1_b = wgbtab[wrid_1] + (trim * 2);
+    wgsz_2_a = wgatab[wrid_2] + (trim * 2);
+    wgsz_2_b = wgbtab[wrid_2] + (trim * 2);
+
+    /*translate([0,0,wg_len/2]) {
+        difference() {
+            cube([wgsize_b+wall*2, wgsize_a+wall*2, wg_len],          center=true);
+            cube([wgsize_b,        wgsize_a,        wg_len + wall*.1],center=true);
+        }
+    }*/
+
+    difference() {
+        polyhedron(
+            points = [
+                /* Waveguide A */
+                [ wgsz_1_b/2 + wall,  wgsz_1_a/2 + wall, 0],
+                [ wgsz_1_b/2 + wall, -wgsz_1_a/2 - wall, 0],
+                [-wgsz_1_b/2 - wall, -wgsz_1_a/2 - wall, 0],
+                [-wgsz_1_b/2 - wall,  wgsz_1_a/2 + wall, 0],
+                /* Waveguide B */
+                [ wgsz_2_b/2 + wall,  wgsz_2_a/2 + wall, wg_len],
+                [ wgsz_2_b/2 + wall, -wgsz_2_a/2 - wall, wg_len],
+                [-wgsz_2_b/2 - wall, -wgsz_2_a/2 - wall, wg_len],
+                [-wgsz_2_b/2 - wall,  wgsz_2_a/2 + wall, wg_len]
+            ],
+            faces = [
+                [0,1,4],[1,2,5],[2,3,6],[3,0,7],
+                [1,5,4],[2,6,5],[3,7,6],[0,4,7],
+                [1,0,3],[2,1,3],[4,5,7],[5,6,7]
+            ]
+        );
+        polyhedron(
+            points = [
+                /* Waveguide A */
+                [ wgsz_1_b/2,  wgsz_1_a/2, 0],
+                [ wgsz_1_b/2, -wgsz_1_a/2, 0],
+                [-wgsz_1_b/2, -wgsz_1_a/2, 0],
+                [-wgsz_1_b/2,  wgsz_1_a/2, 0],
+                /* Waveguide B */
+                [ wgsz_2_b/2,  wgsz_2_a/2, wg_len],
+                [ wgsz_2_b/2, -wgsz_2_a/2, wg_len],
+                [-wgsz_2_b/2, -wgsz_2_a/2, wg_len],
+                [-wgsz_2_b/2,  wgsz_2_a/2, wg_len]
+            ],
+            faces = [
+                [0,1,4],[1,2,5],[2,3,6],[3,0,7],
+                [1,5,4],[2,6,5],[3,7,6],[0,4,7],
+                [1,0,3],[2,1,3],[4,5,7],[5,6,7]
+            ]
+        );
     }
 }
 
@@ -181,7 +245,10 @@ module _curve(x_sz, y_sz, _rad, _angle, _rot=0) {
  *   rg_rad: Radius of bend, at center of the waveguide cross-section
  *   wg_angle: Angle of bend
  */
-module waveguide_bend(wg_rad, wg_angle) {
+module waveguide_bend(wg_rad, wg_angle, wrid=wrcode) {
+    wgsize_a = wgatab[wrid] + (trim * 2);
+    wgsize_b = wgbtab[wrid] + (trim * 2);
+
     difference() {
         _curve(wgsize_b+wall*2, wgsize_a+wall*2, wg_rad, wg_angle, $fn=300);
         _curve(wgsize_b,        wgsize_a,        wg_rad, wg_angle+0.02, 0.01, $fn=300);
@@ -196,7 +263,10 @@ module waveguide_bend(wg_rad, wg_angle) {
  * Polyhedron code loosely based off of code from Rolf-Dieter Klein (www.rdklein.de)
  *   https://www.thingiverse.com/thing:161428
  */
-module horn(length, theta_h, theta_e) {
+module horn(length, theta_h, theta_e, wrid=wrcode) {
+    wgsize_a = wgatab[wrid] + (trim * 2);
+    wgsize_b = wgbtab[wrid] + (trim * 2);
+
     /* Depth of horn that ends up inside waveguide */
     d_a = wgsize_a / (2 * tan(theta_h));
     d_b = wgsize_b / (2 * tan(theta_e));
