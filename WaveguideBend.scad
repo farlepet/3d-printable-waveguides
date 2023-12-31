@@ -18,6 +18,11 @@ flanged = 3;
 /* Amount to trim back internal and mating surfaces, for the purpose of accounting for metallic tape or coating. */
 trim = 0.05;
 
+/* Wavegiode rotation
+ *   0: E-bend
+ *  90: H-bend */
+rotation = 0;
+
 /* Angle of waveguide bend */
 section_angle = 90;
 
@@ -43,21 +48,25 @@ include <common.scad>
 
 difference() {
     union() {
-        flange();
-        waveguide(straight_length - (flanged/2));
+        rotate([0, 0, -rotation]) {
+            flange();
+            waveguide(straight_length - (flanged/2));
+        }
 
         translate([0, 0, straight_length - flanged]) {
             translate([-section_radius*(1-cos(section_angle)), 0,
                         section_radius*sin(section_angle)]) {
                 rotate([0, -section_angle, 0]) {
-                    waveguide(straight_length - (flanged/2));
-                    translate([0, 0, straight_length - (flanged/2)]) {
-                        flange();
+                    rotate([0, 0, -rotation]) {
+                        waveguide(straight_length - (flanged/2));
+                        translate([0, 0, straight_length - (flanged/2)]) {
+                            flange();
+                        }
                     }
                 }
             }
 
-            waveguide_bend(section_radius, section_angle);
+            waveguide_bend(section_radius, section_angle, dir=rotation);
         }
     }
 

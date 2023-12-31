@@ -228,12 +228,14 @@ module waveguide_transition(wg_len, wrid_1, wrid_2) {
     }
 }
 
-module _curve(x_sz, y_sz, _rad, _angle, _rot=0) {
+module _curve(x_sz, y_sz, _rad, _angle, _rot=0, _dir=0) {
     translate([-_rad, , 0]) {
         rotate([90, _rot, 0]) {
             rotate_extrude(angle = _angle) {
                 translate([_rad, 0, 0]) {
-                    square([x_sz, y_sz], center = true);
+                    rotate([0, 0, _dir]) {
+                        square([x_sz, y_sz], center = true);
+                    }
                 }
             }
         }
@@ -245,13 +247,13 @@ module _curve(x_sz, y_sz, _rad, _angle, _rot=0) {
  *   rg_rad: Radius of bend, at center of the waveguide cross-section
  *   wg_angle: Angle of bend
  */
-module waveguide_bend(wg_rad, wg_angle, wrid=wrcode) {
+module waveguide_bend(wg_rad, wg_angle, wrid=wrcode, dir=0) {
     wgsize_a = wgatab[wrid] + (trim * 2);
     wgsize_b = wgbtab[wrid] + (trim * 2);
 
     difference() {
-        _curve(wgsize_b+wall*2, wgsize_a+wall*2, wg_rad, wg_angle, $fn=300);
-        _curve(wgsize_b,        wgsize_a,        wg_rad, wg_angle+0.02, 0.01, $fn=300);
+        _curve(wgsize_b+wall*2, wgsize_a+wall*2, wg_rad, wg_angle, _dir=dir, $fn=300);
+        _curve(wgsize_b,        wgsize_a,        wg_rad, wg_angle+0.02, 0.01, _dir=dir, $fn=300);
     }
 }
 
