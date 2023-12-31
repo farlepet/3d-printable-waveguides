@@ -179,13 +179,6 @@ module waveguide_transition(wg_len, wrid_1, wrid_2) {
     wgsz_2_a = wgatab[wrid_2] + (trim * 2);
     wgsz_2_b = wgbtab[wrid_2] + (trim * 2);
 
-    /*translate([0,0,wg_len/2]) {
-        difference() {
-            cube([wgsize_b+wall*2, wgsize_a+wall*2, wg_len],          center=true);
-            cube([wgsize_b,        wgsize_a,        wg_len + wall*.1],center=true);
-        }
-    }*/
-
     difference() {
         polyhedron(
             points = [
@@ -254,6 +247,19 @@ module waveguide_bend(wg_rad, wg_angle, wrid=wrcode, dir=0) {
     difference() {
         _curve(wgsize_b+wall*2, wgsize_a+wall*2, wg_rad, wg_angle, _dir=dir, $fn=300);
         _curve(wgsize_b,        wgsize_a,        wg_rad, wg_angle+0.02, 0.01, _dir=dir, $fn=300);
+    }
+}
+
+module _twist(x_sz, y_sz, length, rotation) {
+    linear_extrude(height=length, twist=rotation) {
+        square([x_sz, y_sz], center = true);
+    }
+}
+
+module waveguide_twist(wg_len, wg_rot, wrid=wrcode) {
+    difference() {
+        _twist(wgsize_b+wall*2, wgsize_a+wall*2, wg_len, wg_rot);
+        _twist(wgsize_b,        wgsize_a,        wg_len, wg_rot);
     }
 }
 
