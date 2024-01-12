@@ -54,7 +54,7 @@ difference() {
         }
 
         translate([0, 0, straight_length - flanged]) {
-            translate([-section_radius*(1-cos(section_angle)), 0,
+            translate([-section_radius*(1-cos(section_angle))*.999, 0,
                         section_radius*sin(section_angle)]) {
                 rotate([0, -section_angle, 0]) {
                     rotate([0, 0, -rotation]) {
@@ -71,7 +71,7 @@ difference() {
     }
 
     if(split_part) {
-        translate([wgsize_a, 0, -flanged]) {
+        translate([wgsize_a*1.5, 0, -flanged]) {
             rotate([0, 0, 180]) {
                 cube([(section_radius + straight_length)*2,
                       trim*2,
