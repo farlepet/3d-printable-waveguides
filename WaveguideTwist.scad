@@ -43,15 +43,27 @@ difference() {
             }
         }
 
-        translate([0, 0, flanged*.499]) {
-            waveguide_twist((length - flanged*1.99), rotation, $fn=1200);
+        translate([0, 0, flanged*.5]) {
+            waveguide_twist((length - flanged*2), rotation, $fn=4800);
         }
 
     }
 
     if(split_part) {
-        translate([-trim, -wgsize_a*2, -flanged])
-            cube([trim * 2, wgsize_a*4, length*1.5]);
+        translate([0, 0, flanged*0.499]) {
+            linear_extrude(height=(length - flanged*1.99), twist=rotation, $fn=4800) {
+                square([trim * 2, wgsize_a*4], center = true);
+            }
+        }
+
+        translate([0, 0, 0]) {
+            cube([trim * 2, wgsize_a*4, flanged*1.001], center=true);
+        }
+        translate([0, 0, (length - flanged) - (2 * trim)]) {
+            rotate([0, 0, -rotation]) {
+                cube([trim * 2, wgsize_a*4, flanged], center=true);
+            }
+        }
     }
 }
 
