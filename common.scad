@@ -68,7 +68,7 @@ $fn=36;
  *   Heavily based on code from Rolf-Dieter Klein (www.rdklein.de)
  *   https://www.thingiverse.com/thing:161428
  */
-module flange(wrid = wrcode) {
+module flange(wrid = wrcode, hole = true) {
     thickness = flanged - trim;
 
     flange_type   = fttab[wrid];
@@ -88,7 +88,9 @@ module flange(wrid = wrcode) {
                     rotate([0,0,45])
                         cube([flange_size*1.4142*0.9,flange_size*1.4142*0.9,thickness],center=true);
                 }
-                cube([wgbtab[wrid], wgatab[wrid], flanged*2], center=true);
+                if(hole) {
+                    cube([wgbtab[wrid] + (trim * 2), wgatab[wrid] + (trim * 2), flanged*2], center=true);
+                }
             }
             /* Holes */
             translate([-flange_hole_s,  flange_hole_l, 0]) cylinder(h=thickness*1.1, r=flange_drill, center=true);
@@ -110,7 +112,9 @@ module flange(wrid = wrcode) {
                         }
                     }
                 }
-                cube([wgbtab[wrid], wgatab[wrid], flanged*2],center=true);
+                if(hole) {
+                    cube([wgbtab[wrid] + (trim * 2), wgatab[wrid] + (trim * 2), flanged*2],center=true);
+                }
             }
 
             for(m = [0:1]) {
@@ -140,7 +144,9 @@ module flange(wrid = wrcode) {
 
         difference() {
             cylinder(h=thickness, r=cflange_r[wrid], center=true, $fn=120);
-            cube([wgbtab[wrid], wgatab[wrid], flanged*2],center=true);
+            if(hole) {
+                cube([wgbtab[wrid] + (trim * 2), wgatab[wrid] + (trim * 2), flanged*2],center=true);
+            }
 
             for(i = [0:7]) {
                 rotate(cflange_hole_off[wrid] + i * 45, [0, 0, 1]) {
